@@ -1,28 +1,39 @@
-"""Marshmallow response schemas for the parking API."""
+"""Pydantic response schemas for the parking API."""
 
-from marshmallow import Schema, fields
-
-
-class SpotStatusSchema(Schema):
-    """Serialize a parking spot's latest status history entry."""
-
-    id = fields.Integer(attribute="status.id")
-    name = fields.String(attribute="status.name")
-    slug = fields.String(attribute="status.slug")
-    recorded_at = fields.DateTime(attribute="created_at")
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 
 
-class ParkingSpotSchema(Schema):
+class ResponseSchema(BaseModel):
+    """Base schema that reads ORM models and serializes keys as camelCase."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        from_attributes=True,
+        populate_by_name=True,
+        serialize_by_alias=True,
+    )
+
+
+class SpotStatusSchema(ResponseSchema):
+    """Serialize a parking spot status."""
+
+    id: int
+    name: str
+    slug: str
+
+
+class ParkingSpotSchema(ResponseSchema):
     """Serialize a parking spot with its latest known status."""
 
-    id = fields.Integer()
-    number = fields.Integer()
-    last_status = fields.Nested(SpotStatusSchema, allow_none=True)
+    id: int
+    number: int
+    last_status: SpotStatusSchema | None
 
 
-class ParkingLotSchema(Schema):
+class ParkingLotSchema(ResponseSchema):
     """Serialize a parking lot with all of its parking spots."""
 
-    id = fields.Integer()
-    name = fields.String()
-    parking_spots = fields.List(fields.Nested(ParkingSpotSchema))
+    id: int
+    name: str
+    parking_spots: list[ParkingSpotSchema] = Field(default_factory=list)

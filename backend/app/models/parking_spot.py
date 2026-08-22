@@ -12,6 +12,7 @@ from app.models.base import Base, TimestampMixin
 if TYPE_CHECKING:
     from app.models.parking_lot import ParkingLot
     from app.models.parking_spot_status import ParkingSpotStatus
+    from app.models.spot_status import SpotStatus
 
 
 class ParkingSpot(TimestampMixin, Base):
@@ -37,13 +38,14 @@ class ParkingSpot(TimestampMixin, Base):
     )
 
     @property
-    def last_status(self) -> ParkingSpotStatus | None:
-        """Return the latest status history entry for this parking spot."""
+    def last_status(self) -> SpotStatus | None:
+        """Return the spot status from the latest history entry."""
 
         if not self.status_history:
             return None
 
-        return max(
+        latest_history = max(
             self.status_history,
             key=lambda status: (status.created_at, status.id),
         )
+        return latest_history.status
