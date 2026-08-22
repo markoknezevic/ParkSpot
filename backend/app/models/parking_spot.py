@@ -11,6 +11,7 @@ from app.models.base import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.parking_lot import ParkingLot
+    from app.models.parking_spot_status import ParkingSpotStatus
 
 
 class ParkingSpot(TimestampMixin, Base):
@@ -29,3 +30,8 @@ class ParkingSpot(TimestampMixin, Base):
         index=True,
     )
     parking_lot: Mapped[ParkingLot] = relationship(back_populates="parking_spots")
+    status_history: Mapped[list[ParkingSpotStatus]] = relationship(
+        back_populates="parking_spot",
+        cascade="all, delete-orphan",
+        order_by="ParkingSpotStatus.created_at",
+    )
