@@ -4,16 +4,17 @@
 
 ### Run with Docker
 
-Start the FastAPI application and PostgreSQL database. The API container applies
-all Alembic migrations before starting:
+Start the FastAPI application, PostgreSQL, Redis, and the Celery worker. The API
+container applies all Alembic migrations before starting:
 
 ```bash
 docker compose up --build
 ```
 
 The API is available at <http://127.0.0.1:8000/> and PostgreSQL at
-`localhost:5434` (database/user/password: `parkspot`). Database data is kept in
-the `postgres_data` Docker volume.
+`localhost:5434` (database/user/password: `parkspot`). Calling the root endpoint
+queues a Celery task that logs `Hello World` in the worker container. Database
+data is kept in the `postgres_data` Docker volume.
 
 To run only PostgreSQL for local backend development:
 
