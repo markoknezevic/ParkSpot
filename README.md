@@ -47,3 +47,9 @@ cd backend
 uv run alembic revision --autogenerate -m "describe the change"
 uv run alembic upgrade head
 ```
+
+Seed the default statuses and a 10-slot parking lot after applying migrations:
+
+```bash
+psql postgresql://parkspot:parkspot@localhost:5434/parkspot -f backend/seed.sql
+```
