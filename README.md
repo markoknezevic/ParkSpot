@@ -8,7 +8,7 @@ Install the dependencies and start the API with
 ```bash
 cd backend
 uv sync
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.core.main:app --reload
 ```
 
 Open <http://127.0.0.1:8000/> to receive:
