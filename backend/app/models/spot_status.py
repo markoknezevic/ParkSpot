@@ -8,12 +8,13 @@ from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
+from app.models.slug import SlugMixin
 
 if TYPE_CHECKING:
     from app.models.parking_spot_status import ParkingSpotStatus
 
 
-class SpotStatus(TimestampMixin, Base):
+class SpotStatus(SlugMixin, TimestampMixin, Base):
     """A status that can be assigned to a parking spot."""
 
     __tablename__ = "spot_status"
