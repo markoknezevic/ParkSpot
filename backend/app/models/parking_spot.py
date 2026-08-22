@@ -35,3 +35,15 @@ class ParkingSpot(TimestampMixin, Base):
         cascade="all, delete-orphan",
         order_by="ParkingSpotStatus.created_at",
     )
+
+    @property
+    def last_status(self) -> ParkingSpotStatus | None:
+        """Return the latest status history entry for this parking spot."""
+
+        if not self.status_history:
+            return None
+
+        return max(
+            self.status_history,
+            key=lambda status: (status.created_at, status.id),
+        )

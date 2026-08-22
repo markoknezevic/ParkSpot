@@ -23,4 +23,5 @@ class ParkingLot(TimestampMixin, Base):
     parking_spots: Mapped[list[ParkingSpot]] = relationship(
         back_populates="parking_lot",
         cascade="all, delete-orphan",
+        order_by="ParkingSpot.number",
     )

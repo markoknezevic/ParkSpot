@@ -11,10 +11,9 @@ container applies all Alembic migrations before starting:
 docker compose up --build
 ```
 
-The API is available at <http://127.0.0.1:8000/> and PostgreSQL at
-`localhost:5434` (database/user/password: `parkspot`). Calling the root endpoint
-queues a Celery task that logs `Hello World` in the worker container. Database
-data is kept in the `postgres_data` Docker volume.
+The API documentation is available at <http://127.0.0.1:8000/docs> and PostgreSQL
+at `localhost:5434` (database/user/password: `parkspot`). Database data is kept
+in the `postgres_data` Docker volume.
 
 To run only PostgreSQL for local backend development:
 
@@ -34,11 +33,8 @@ uv run alembic upgrade head
 uv run uvicorn app.core.main:app --reload
 ```
 
-Open <http://127.0.0.1:8000/> to receive:
-
-```json
-{"message": "Hello World"}
-```
+Use `GET /parking-lots/{parking_lot_id}` to retrieve a parking lot with its
+parking spots and their latest statuses.
 
 Create future schema migrations from model changes with:
 

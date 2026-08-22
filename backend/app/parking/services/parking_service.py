@@ -2,8 +2,9 @@
 
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 
+from app.models import ParkingLot
 from app.parking.repositories import ParkingRepository
 
 
@@ -14,5 +15,12 @@ class ParkingService:
     ) -> None:
         self._repository = repository
 
-    def get_welcome_message(self) -> dict[str, str]:
-        return self._repository.get_welcome_message()
+    def get_parking_lot(self, parking_lot_id: int) -> ParkingLot:
+        parking_lot = self._repository.get_parking_lot(parking_lot_id)
+        if parking_lot is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parking lot not found",
+            )
+
+        return parking_lot
