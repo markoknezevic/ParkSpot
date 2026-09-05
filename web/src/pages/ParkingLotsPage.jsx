@@ -56,7 +56,6 @@ function ParkingLotsPage() {
           <div className="data-card__header">
             <div>
               <h2 id="locations-title">All locations</h2>
-              <p>Parking lots returned by the ParkSpot API.</p>
             </div>
             <span className="api-badge">
               <span aria-hidden="true" />

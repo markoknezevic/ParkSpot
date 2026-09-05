@@ -1,26 +1,40 @@
+import { Link, NavLink, Route, Routes } from 'react-router-dom'
 import ParkingLotsPage from './pages/ParkingLotsPage.jsx'
+import ParkingLotDetailsPage from './pages/ParkingLotDetailsPage.jsx'
 
 function App() {
   return (
     <div className="app-shell">
       <header className="site-header">
         <div className="container site-header__content">
-          <a className="brand" href="/" aria-label="ParkSpot home">
+          <Link className="brand" to="/" aria-label="ParkSpot home">
             <span className="brand__mark" aria-hidden="true">
               P
             </span>
             <span>ParkSpot</span>
-          </a>
+          </Link>
 
           <nav aria-label="Main navigation">
-            <a className="nav-link nav-link--active" href="/">
+            <NavLink
+              className={({ isActive }) =>
+                `nav-link${isActive ? ' nav-link--active' : ''}`
+              }
+              to="/"
+              end
+            >
               Parking lots
-            </a>
+            </NavLink>
           </nav>
         </div>
       </header>
 
-      <ParkingLotsPage />
+      <Routes>
+        <Route path="/" element={<ParkingLotsPage />} />
+        <Route
+          path="/parking-lots/:parkingLotId"
+          element={<ParkingLotDetailsPage />}
+        />
+      </Routes>
 
       <footer className="site-footer">
         <div className="container site-footer__content">

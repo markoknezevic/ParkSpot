@@ -253,7 +253,7 @@ th {
 
 th:last-child,
 td:last-child {
-  width: 190px;
+  width: 180px;
 }
 
 td {
@@ -269,6 +269,15 @@ tbody tr {
 
 tbody tr:hover {
   background: #fbfdfc;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:focus-visible {
+  outline: 3px solid rgba(20, 122, 80, 0.28);
+  outline-offset: -3px;
 }
 
 .parking-lot-name {
@@ -318,6 +327,100 @@ tbody tr:hover {
   font-size: 0.78rem;
   font-weight: 650;
   text-align: center;
+}
+
+.action-heading,
+.action-cell {
+  text-align: right;
+}
+
+.details-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 13px;
+  border: 1px solid #cfe3d8;
+  border-radius: 8px;
+  background: #f0f8f4;
+  color: #126c48;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 750;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.details-button:hover {
+  border-color: #aad1bd;
+  background: #e4f3eb;
+  transform: translateX(2px);
+}
+
+.details-button:focus-visible,
+.back-link:focus-visible {
+  outline: 3px solid rgba(20, 122, 80, 0.25);
+  outline-offset: 3px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 38px;
+  color: #526159;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #126c48;
+}
+
+.details-intro {
+  margin-bottom: 32px;
+}
+
+.details-card {
+  display: flex;
+  min-height: 190px;
+  align-items: center;
+  gap: 20px;
+  padding: 32px;
+  border: 1px solid #e0e7e3;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 18px 50px rgba(34, 55, 44, 0.07);
+}
+
+.details-card__icon {
+  display: grid;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 15px;
+  background: #eaf4ef;
+  color: #147a50;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.details-card h2 {
+  margin-bottom: 7px;
+  color: #17221d;
+  font-size: 1.08rem;
+}
+
+.details-card p {
+  margin-bottom: 0;
+  color: #748078;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .message-state {
@@ -420,7 +523,26 @@ tbody tr:hover {
 
   th:last-child,
   td:last-child {
-    width: 120px;
+    width: 142px;
+  }
+
+  .details-button {
+    width: 38px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .details-button span {
+    font-size: 1rem;
+  }
+
+  .back-link {
+    margin-bottom: 30px;
+  }
+
+  .details-card {
+    align-items: flex-start;
+    padding: 24px;
   }
 
   .site-footer__content {
