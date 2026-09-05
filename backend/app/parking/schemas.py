@@ -31,6 +31,13 @@ class ParkingSpotSchema(ResponseSchema):
     last_status: SpotStatusSchema | None
 
 
+class ParkingLotSummarySchema(ResponseSchema):
+    """Serialize the identifying fields of a parking lot."""
+
+    id: int
+    name: str
+
+
 class ParkingLotSchema(ResponseSchema):
     """Serialize a parking lot with all of its parking spots."""
 

@@ -1,14 +1,24 @@
 """HTTP routes for parking lots."""
 
+from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
 from app.models import ParkingLot
-from app.parking.schemas import ParkingLotSchema
+from app.parking.schemas import ParkingLotSchema, ParkingLotSummarySchema
 from app.parking.services import ParkingService
 
 router = APIRouter(tags=["parking"])
+
+
+@router.get("/parking-lots", response_model=list[ParkingLotSummarySchema])
+def get_parking_lots(
+    service: Annotated[ParkingService, Depends(ParkingService)],
+) -> Sequence[ParkingLot]:
+    """Get all parking lots with only their IDs and names."""
+
+    return service.get_parking_lots()
 
 
 @router.get(

@@ -33,8 +33,9 @@ uv run alembic upgrade head
 uv run uvicorn app.core.main:app --reload
 ```
 
-Use `GET /parking-lots/{parking_lot_id}` to retrieve a parking lot with its
-parking spots and their latest statuses.
+Use `GET /parking-lots` to retrieve all parking lots with only their IDs and
+names. Use `GET /parking-lots/{parking_lot_id}` to retrieve a parking lot with
+its parking spots and their latest statuses.
 
 Create future schema migrations from model changes with:
 
