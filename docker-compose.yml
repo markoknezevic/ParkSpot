@@ -31,6 +31,8 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://parkspot:parkspot@db:5432/parkspot
       CELERY_BROKER_URL: redis://redis:6379/0
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:-dev-xra3gs5hmyhr87je.us.auth0.com}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:-https://parkspot-api}
     ports:
       - "8000:8000"
     depends_on:

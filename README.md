@@ -29,6 +29,8 @@ Install the dependencies and start the API with
 ```bash
 cd backend
 uv sync
+export AUTH0_DOMAIN=dev-xra3gs5hmyhr87je.us.auth0.com
+export AUTH0_AUDIENCE=https://parkspot-api
 uv run alembic upgrade head
 uv run uvicorn app.core.main:app --reload
 ```
@@ -36,6 +38,24 @@ uv run uvicorn app.core.main:app --reload
 Use `GET /parking-lots` to retrieve all parking lots with only their IDs and
 names. Use `GET /parking-lots/{parking_lot_id}` to retrieve a parking lot with
 its parking spots and their latest statuses.
+
+Both endpoints require an Auth0 user access token in `Authorization: Bearer ...`.
+In Auth0, register an API with identifier `https://parkspot-api` and RS256 signing,
+or set `AUTH0_AUDIENCE` to your existing API identifier. The frontend's
+`VITE_AUTH0_AUDIENCE` must match. Docker Compose uses these same environment
+variables with the defaults shown above. Restart the frontend after env changes.
+
+`require_registered_user` validates the token and finds or creates a local user
+by issuer and subject. It does not link existing accounts by email or grant roles.
+Profile fields remain empty until collected separately. The profile migration's
+downgrade requires filling missing profile fields first.
+
+Run backend authentication tests without Auth0 or PostgreSQL:
+
+```bash
+cd backend
+.venv/bin/python -m unittest discover -s tests -v
+```
 
 Create future schema migrations from model changes with:
 

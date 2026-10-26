@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'
 import { getParkingLots } from '../api/parkingLots.js'
 import ParkingLotTable from '../components/ParkingLotTable.jsx'
 
 function ParkingLotsPage() {
+  const { getAccessTokenSilently } = useAuth0()
   const [parkingLots, setParkingLots] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -12,7 +14,9 @@ function ParkingLotsPage() {
 
     async function loadParkingLots() {
       try {
-        const data = await getParkingLots({ signal: controller.signal })
+        const accessToken = await getAccessTokenSilently()
+        if (controller.signal.aborted) return
+        const data = await getParkingLots({ signal: controller.signal, accessToken })
         setParkingLots(data)
       } catch (requestError) {
         if (requestError.name !== 'AbortError') {
@@ -28,7 +32,7 @@ function ParkingLotsPage() {
     loadParkingLots()
 
     return () => controller.abort()
-  }, [])
+  }, [getAccessTokenSilently])
 
   const locationLabel = `${parkingLots.length} ${
     parkingLots.length === 1 ? 'location' : 'locations'

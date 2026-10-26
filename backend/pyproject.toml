@@ -5,6 +5,7 @@ description = "ParkSpot FastAPI backend"
 requires-python = ">=3.10"
 dependencies = [
     "alembic>=1.16,<2.0",
+    "auth0-fastapi-api>=1.0.0b9",
     "celery[redis]>=5.5,<6.0",
     "fastapi>=0.115,<1.0",
     "psycopg[binary]>=3.2,<4.0",

@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from app.core.auth import require_registered_user
 
 from app.models import ParkingLot
 from app.parking.schemas import ParkingLotSchema, ParkingLotSummarySchema
@@ -12,7 +13,11 @@ from app.parking.services import ParkingService
 router = APIRouter(tags=["parking"])
 
 
-@router.get("/parking-lots", response_model=list[ParkingLotSummarySchema])
+@router.get(
+    "/parking-lots",
+    response_model=list[ParkingLotSummarySchema],
+    dependencies=[Depends(require_registered_user)],
+)
 def get_parking_lots(
     service: Annotated[ParkingService, Depends(ParkingService)],
 ) -> Sequence[ParkingLot]:
@@ -24,6 +29,7 @@ def get_parking_lots(
 @router.get(
     "/parking-lots/{parking_lot_id}",
     response_model=ParkingLotSchema,
+    dependencies=[Depends(require_registered_user)],
     responses={status.HTTP_404_NOT_FOUND: {"description": "Parking lot not found"}},
 )
 def get_parking_lot(
