@@ -70,8 +70,10 @@ uv run --env-file .env alembic revision --autogenerate -m "describe the change"
 uv run --env-file .env alembic upgrade head
 ```
 
-Seed the default statuses and a 10-slot parking lot after applying migrations:
+After applying migrations, populate three sample lots with Free, Pending, and Taken spots.
+Rerunning the script restores the sample spots' assigned statuses and preserves their history.
 
 ```bash
-psql postgresql://parkspot:parkspot@localhost:5434/parkspot -f backend/seed.sql
+cd backend
+uv run --env-file .env python seed.py
 ```
