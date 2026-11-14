@@ -1,0 +1,1 @@
+"""ParkSpot backend application package."""
