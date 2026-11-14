@@ -29,11 +29,16 @@ Install the dependencies and start the API with
 ```bash
 cd backend
 uv sync
-export AUTH0_DOMAIN=dev-xra3gs5hmyhr87je.us.auth0.com
-export AUTH0_AUDIENCE=https://parkspot-api
-uv run alembic upgrade head
-uv run uvicorn app.core.main:app --reload
+cp -n .env.example .env
+uv run --env-file .env alembic upgrade head
+uv run --env-file .env uvicorn app.core.main:app --reload
 ```
+
+`uv run` uses the backend's `.venv` and loads configuration from `.env` when
+`--env-file .env` is supplied. The `.env` file is ignored by Git. Adjust
+`DATABASE_URL` for your PostgreSQL instance; the example uses `localhost:5434`,
+the port exposed by the Docker database. For PostgreSQL installed directly on
+your machine, use its configured port (usually `5432`) and credentials.
 
 Use `GET /parking-lots` to retrieve all parking lots with only their IDs and
 names. Use `GET /parking-lots/{parking_lot_id}` to retrieve a parking lot with
@@ -61,8 +66,8 @@ Create future schema migrations from model changes with:
 
 ```bash
 cd backend
-uv run alembic revision --autogenerate -m "describe the change"
-uv run alembic upgrade head
+uv run --env-file .env alembic revision --autogenerate -m "describe the change"
+uv run --env-file .env alembic upgrade head
 ```
 
 Seed the default statuses and a 10-slot parking lot after applying migrations:
