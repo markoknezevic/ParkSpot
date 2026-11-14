@@ -52,7 +52,8 @@ variables with the defaults shown above. Restart the frontend after env changes.
 
 `require_registered_user` validates the token and finds or creates a local user
 by issuer and subject. It does not link existing accounts by email or grant roles.
-Profile fields remain empty until collected separately. The profile migration's
+On first access, the API requests the user’s email from Auth0’s `/userinfo` endpoint.
+If Auth0 omits the email, the field stays empty. Existing users skip this lookup. The profile migration's
 downgrade requires filling missing profile fields first.
 
 Run backend authentication tests without Auth0 or PostgreSQL:
