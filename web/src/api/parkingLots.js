@@ -1,6 +1,6 @@
-export async function getParkingLots({ signal, accessToken } = {}) {
+async function fetchParkingLots(path, { signal, accessToken } = {}) {
   if (!accessToken) throw new Error('An access token is required')
-  const response = await fetch('/api/parking-lots', {
+  const response = await fetch(path, {
     signal,
     headers: { Authorization: `Bearer ${accessToken}` },
   })
@@ -10,4 +10,12 @@ export async function getParkingLots({ signal, accessToken } = {}) {
   }
 
   return response.json()
+}
+
+export function getParkingLots(options) {
+  return fetchParkingLots('/api/parking-lots', options)
+}
+
+export function getParkingLot(id, options) {
+  return fetchParkingLots(`/api/parking-lots/${encodeURIComponent(id)}`, options)
 }

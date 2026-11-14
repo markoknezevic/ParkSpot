@@ -28,6 +28,7 @@ class ParkingSpotSchema(ResponseSchema):
 
     id: int
     number: int
+    level: int | None = None
     last_status: SpotStatusSchema | None
 
 

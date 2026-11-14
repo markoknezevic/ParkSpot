@@ -540,6 +540,42 @@ tbody tr:hover {
   gap: 24px;
 }
 
+.spot-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: #edf0f3;
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.spot-status::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.spot-status[data-status="free"] {
+  background: #dcf5e6;
+  color: #17633b;
+}
+
+.spot-status[data-status="pending"] {
+  background: #fff0cb;
+  color: #805000;
+}
+
+.spot-status[data-status="taken"] {
+  background: #fde5e5;
+  color: #952e39;
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
