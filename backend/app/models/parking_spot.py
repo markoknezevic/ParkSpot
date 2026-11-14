@@ -4,15 +4,31 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey, UniqueConstraint, and_, select
+from sqlalchemy.orm import Mapped, aliased, mapped_column, relationship
 
 from app.models.base import Base, TimestampMixin
+from app.models.parking_spot_status import ParkingSpotStatus
 
 if TYPE_CHECKING:
     from app.models.parking_lot import ParkingLot
-    from app.models.parking_spot_status import ParkingSpotStatus
     from app.models.spot_status import SpotStatus
+
+
+def _latest_history_join():
+    history = aliased(ParkingSpotStatus)
+    latest_id = (
+        select(history.id)
+        .where(history.parking_spot_id == ParkingSpot.id)
+        .order_by(history.created_at.desc(), history.id.desc())
+        .limit(1)
+        .correlate(ParkingSpot)
+        .scalar_subquery()
+    )
+    return and_(
+        ParkingSpot.id == ParkingSpotStatus.parking_spot_id,
+        ParkingSpotStatus.id == latest_id,
+    )
 
 
 class ParkingSpot(TimestampMixin, Base):
@@ -37,15 +53,12 @@ class ParkingSpot(TimestampMixin, Base):
         order_by="ParkingSpotStatus.created_at",
     )
 
+    latest_history: Mapped[ParkingSpotStatus | None] = relationship(
+        primaryjoin=_latest_history_join, viewonly=True
+    )
+
     @property
     def last_status(self) -> SpotStatus | None:
-        """Return the spot status from the latest history entry."""
+        """Return the status from the latest history row, if one exists."""
 
-        if not self.status_history:
-            return None
-
-        latest_history = max(
-            self.status_history,
-            key=lambda status: (status.created_at, status.id),
-        )
-        return latest_history.status
+        return self.latest_history.status if self.latest_history else None
