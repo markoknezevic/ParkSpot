@@ -656,3 +656,31 @@ tbody tr:hover {
     animation-iteration-count: 1 !important;
   }
 }
+
+.profile-form {
+  display: grid;
+  max-width: 32rem;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 24px;
+}
+
+.profile-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 650;
+}
+
+.profile-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bacbc1;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  font-weight: 400;
+}
+
+.profile-form button {
+  justify-self: start;
+}

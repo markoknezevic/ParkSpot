@@ -4,6 +4,8 @@ import { Link, NavLink, Route, Routes } from 'react-router-dom'
 import ParkingLotsPage from './pages/ParkingLotsPage.jsx'
 import ParkingLotDetailsPage from './pages/ParkingLotDetailsPage.jsx'
 
+import ProfilePage from './pages/ProfilePage.jsx'
+
 function App() {
   const { isLoading, isAuthenticated, error, loginWithRedirect, logout, user } = useAuth0()
   const [actionError, setActionError] = useState(null)
@@ -44,6 +46,12 @@ function App() {
             >
               Parking lots
             </NavLink>
+            <NavLink
+              className={({ isActive }) => `nav-link${isActive ? ' nav-link--active' : ''}`}
+              to="/profile"
+            >
+              Profile
+            </NavLink>
           </nav>}
 
           {!isLoading && isAuthenticated && (
@@ -77,6 +85,7 @@ function App() {
           </div>
         </main>
       ) : isAuthenticated ? <Routes>
+        <Route path="/profile" element={<ProfilePage key={user?.sub} />} />
         <Route path="/" element={<ParkingLotsPage />} />
         <Route
           path="/parking-lots/:parkingLotId"
