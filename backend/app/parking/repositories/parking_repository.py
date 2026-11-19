@@ -4,11 +4,12 @@ from collections.abc import Sequence
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import case, func, select
+from sqlalchemy.engine import RowMapping
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
-from app.models import ParkingLot, ParkingSpot, ParkingSpotStatus
+from app.models import ParkingLot, ParkingSpot, ParkingSpotStatus, SpotStatus
 
 
 class ParkingRepository:
@@ -34,3 +35,61 @@ class ParkingRepository:
             .where(ParkingLot.id == parking_lot_id)
         )
         return self._session.execute(statement).unique().scalar_one_or_none()
+
+    def get_parking_availability(self, level: int | None = None, parking_lot_id: int | None = None) -> Sequence[RowMapping]:
+        """Count latest statuses by lot and level. Groups without spots are omitted."""
+        free = func.count(case((SpotStatus.slug == "free", 1)))
+        taken = func.count(case((SpotStatus.slug == "taken", 1)))
+        pending = func.count(case((SpotStatus.slug == "pending", 1)))
+        total = func.count(ParkingSpot.id)
+        statement = (
+            select(
+                ParkingLot.id.label("parking_lot_id"),
+                ParkingLot.name.label("parking_lot_name"),
+                ParkingSpot.level,
+                total.label("total"),
+                free.label("free"),
+                taken.label("taken"),
+                pending.label("pending"),
+                (total - free - taken - pending).label("unknown"),
+            )
+            .select_from(ParkingSpot)
+            .join(ParkingSpot.parking_lot)
+            .outerjoin(ParkingSpot.latest_history)
+            .outerjoin(ParkingSpotStatus.status)
+            .group_by(ParkingLot.id, ParkingLot.name, ParkingSpot.level)
+            .order_by(ParkingLot.id, ParkingSpot.level.asc().nulls_last())
+        )
+        if parking_lot_id is not None:
+            statement = statement.where(ParkingLot.id == parking_lot_id)
+        if level is not None:
+            statement = statement.where(ParkingSpot.level == level)
+        return self._session.execute(statement).mappings().all()
+
+    def list_free_spots(self, level: int | None = None, parking_lot_id: int | None = None) -> Sequence[RowMapping]:
+        """List spots whose latest status is free, optionally filtering by level."""
+        statement = (
+            select(
+                ParkingSpot.id,
+                ParkingSpot.number,
+                ParkingSpot.level,
+                ParkingLot.id.label("parking_lot_id"),
+                ParkingLot.name.label("parking_lot_name"),
+            )
+            .select_from(ParkingSpot)
+            .join(ParkingSpot.parking_lot)
+            .join(ParkingSpot.latest_history)
+            .join(ParkingSpotStatus.status)
+            .where(SpotStatus.slug == "free")
+            .order_by(ParkingLot.id, ParkingSpot.level.asc().nulls_last(), ParkingSpot.number)
+        )
+        if parking_lot_id is not None:
+            statement = statement.where(ParkingLot.id == parking_lot_id)
+        if level is not None:
+            statement = statement.where(ParkingSpot.level == level)
+        return self._session.execute(statement).mappings().all()
+
+    def find_parking_lots_by_name(self, name: str) -> Sequence[ParkingLot]:
+        """Match a full lot name case-insensitively without interpreting wildcards."""
+        statement = select(ParkingLot).where(func.lower(ParkingLot.name) == name.strip().lower())
+        return self._session.scalars(statement).all()
