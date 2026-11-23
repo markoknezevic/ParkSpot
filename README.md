@@ -2,7 +2,7 @@
 
 ParkSpot is a web application for viewing parking lots, their levels, and individual parking spots. It tracks spot availability using the latest recorded status, helping users find free spaces.
 
-The project includes an LLM chatbot integration that interprets natural-language parking questions and selects tools for checking availability or listing free spots.
+The project includes an LLM chatbot integration that interprets natural-language parking questions, queries counts of free, taken and pending spots by parking lot and level, and uses those results to generate an answer.
 
 ## Technologies
 

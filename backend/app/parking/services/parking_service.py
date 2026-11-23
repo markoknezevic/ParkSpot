@@ -31,12 +31,8 @@ class ParkingService:
         return parking_lot
 
     def get_parking_availability(self, level: int | None = None, parking_lot_name: str | None = None) -> Sequence[RowMapping]:
-        """Return status counts by lot and level across all parking lots."""
+        """Return free, taken and pending counts by lot and level."""
         return self._repository.get_parking_availability(level, self._resolve_lot_id(parking_lot_name))
-
-    def list_free_spots(self, level: int | None = None, parking_lot_name: str | None = None) -> Sequence[RowMapping]:
-        """Return individual free spots across all parking lots."""
-        return self._repository.list_free_spots(level, self._resolve_lot_id(parking_lot_name))
 
     def _resolve_lot_id(self, name: str | None) -> int | None:
         if name is None:

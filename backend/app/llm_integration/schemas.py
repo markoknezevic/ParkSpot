@@ -28,7 +28,7 @@ class ParkingQueryArgumentsResponse(BaseModel):
 
 
 class ToolCallResponse(BaseModel):
-    name: Literal["get_parking_availability", "list_free_spots"]
+    name: Literal["get_parking_availability"]
     arguments: ParkingQueryArgumentsResponse
 
 
