@@ -1,6 +1,7 @@
 services:
   db:
-    image: postgres:17-alpine
+    build:
+      context: ./database
     environment:
       POSTGRES_DB: parkspot
       POSTGRES_USER: parkspot
@@ -34,7 +35,7 @@ services:
       AUTH0_DOMAIN: ${AUTH0_DOMAIN:-dev-xra3gs5hmyhr87je.us.auth0.com}
       AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:-https://parkspot-api}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
     ports:
       - "8000:8000"
     depends_on:
