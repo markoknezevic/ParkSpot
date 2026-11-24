@@ -1,65 +1,71 @@
-"""Ask an LLM to select a parking tool without executing it."""
+"""Answer parking questions using database results and the LLM."""
 
-import json
 from typing import Annotated
 
-import httpx
 from fastapi import Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
 from pydantic import ValidationError
 
-from app.core import config
-from app.core.http_client import get_http_client
-from app.llm_integration.dtos import ToolSelectionDTO, ToolCallDTO
-from app.llm_integration.utils import build_tool_selection_payload
+from app.llm_integration.dtos import ToolSelectionDTO
+from app.llm_integration.llm_client import LLMClient
+from app.llm_integration.utils import validate_tool_selection_payload
+from app.parking.services import ParkingService
 
 
 class LLMService:
-    def __init__(self, client: Annotated[httpx.AsyncClient, Depends(get_http_client)]) -> None:
+    def __init__(
+        self,
+        client: Annotated[LLMClient, Depends(LLMClient)],
+        parking_service: Annotated[ParkingService, Depends(ParkingService)],
+    ) -> None:
         self._client = client
+        self._parking_service = parking_service
+
+    async def answer_message(self, message: str) -> str:
+        """Select a tool, fetch parking data, and return the model's final answer."""
+        selection = await self.select_tool(message)
+        if selection.name is None:
+            if selection.message is None:
+                raise HTTPException(status_code=502, detail="Invalid LLM response")
+            return selection.message
+
+        rows = await run_in_threadpool(
+            self._parking_service.get_parking_availability,
+            parking_lot_name=selection.parking_lot_name,
+            level=selection.level,
+        )
+        data = {"rows": [dict(row) for row in rows]}
+        return await self.generate_answer(message, selection, data)
 
     async def select_tool(self, message: str) -> ToolSelectionDTO:
         """Make one model request and return its proposed tool call or text reply."""
-        if not config.OPENAI_API_KEY or not config.OPENAI_MODEL:
-            raise HTTPException(status_code=503, detail="Configure OPENAI_API_KEY and OPENAI_MODEL")
-
-        try:
-            response = await self._client.post(
-                "https://api.openai.com/v1/responses",
-                headers={"Authorization": f"Bearer {config.OPENAI_API_KEY}"},
-                json=build_tool_selection_payload(message, config.OPENAI_MODEL),
-                timeout=30.0,
-            )
-            response.raise_for_status()
-        except httpx.TimeoutException as exc:
-            raise HTTPException(status_code=504, detail="LLM request timed out") from exc
-        except httpx.HTTPError as exc:
-            raise HTTPException(status_code=502, detail="LLM request failed") from exc
+        response = await self._client.select_tool(message)
 
         try:
             payload = response.json()
-            if payload.get("status") != "completed":
-                raise ValueError("Incomplete model response")
-            calls = []
-            texts = []
-            for item in payload["output"]:
-                if item["type"] == "function_call":
-                    calls.append(ToolCallDTO.model_validate({
-                        "name": item["name"],
-                        "arguments": json.loads(item["arguments"]),
-                    }))
-                elif item["type"] == "message":
-                    for content in item["content"]:
-                        if content["type"] == "output_text":
-                            texts.append(content["text"])
-                        elif content["type"] == "refusal":
-                            texts.append(content["refusal"])
-            if len(calls) > 1:
-                raise ValueError("Expected at most one tool call")
+            calls, texts = validate_tool_selection_payload(payload)
             if calls:
-                return ToolSelectionDTO(tool_call=calls[0])
-            text = "\n".join(texts).strip()
-            if not text:
-                raise ValueError("Empty model response")
-            return ToolSelectionDTO(message=text)
+                call = calls[0]
+                return ToolSelectionDTO(
+                    name=call["name"],
+                    parking_lot_name=call["arguments"]["parking_lot_name"],
+                    level=call["arguments"]["level"],
+                    call_id=call["call_id"],
+                    response_output=payload["output"],
+                )
+            return ToolSelectionDTO(message="\n".join(texts).strip())
+        except (ValueError, TypeError, KeyError, AttributeError, ValidationError) as exc:
+            raise HTTPException(status_code=502, detail="Invalid LLM response") from exc
+
+    async def generate_answer(
+        self, message: str, selection: ToolSelectionDTO, data: dict[str, object],
+    ) -> str:
+        """Call the LLM with parking data and extract the final text reply."""
+        response = await self._client.generate_answer(message, selection, data)
+        try:
+            calls, texts = validate_tool_selection_payload(response.json())
+            if calls:
+                raise ValueError("Expected a final answer, not another tool call")
+            return "\n".join(texts).strip()
         except (ValueError, TypeError, KeyError, AttributeError, ValidationError) as exc:
             raise HTTPException(status_code=502, detail="Invalid LLM response") from exc

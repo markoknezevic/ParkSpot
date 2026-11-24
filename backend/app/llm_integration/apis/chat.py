@@ -5,7 +5,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.core.auth import require_registered_user
-from app.llm_integration.schemas import ChatMessageRequest, ChatMessageResponse
+from app.llm_integration.schemas import (
+    ChatMessageRequest,
+    ChatMessageResponse,
+)
 from app.llm_integration.services import LLMService
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -16,6 +19,8 @@ router = APIRouter(prefix="/chat", tags=["chat"])
     response_model=ChatMessageResponse,
     dependencies=[Depends(require_registered_user)],
     responses={
+        404: {"description": "Parking lot not found"},
+        409: {"description": "Parking lot name is ambiguous"},
         502: {"description": "LLM request failed or returned an invalid response"},
         503: {"description": "LLM is not configured"},
         504: {"description": "LLM request timed out"},
@@ -25,7 +30,7 @@ async def send_message(
     message: ChatMessageRequest,
     service: Annotated[LLMService, Depends(LLMService)],
 ) -> ChatMessageResponse:
-    """Ask the LLM which parking tool to call, without executing the tool."""
+    """Answer a parking question using the database and the LLM."""
 
-    result = await service.select_tool(message.message)
-    return ChatMessageResponse.model_validate(result.model_dump())
+    answer = await service.answer_message(message.message)
+    return ChatMessageResponse(message=answer)

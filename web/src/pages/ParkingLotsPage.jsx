@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
 import { getParkingLots } from '../api/parkingLots.js'
 import ParkingLotTable from '../components/ParkingLotTable.jsx'
+import ParkingChat from '../components/ParkingChat.jsx'
 
 function ParkingLotsPage() {
   const { getAccessTokenSilently } = useAuth0()
@@ -104,6 +105,7 @@ function ParkingLotsPage() {
             )}
           </div>
         </section>
+        <ParkingChat />
       </div>
     </main>
   )
